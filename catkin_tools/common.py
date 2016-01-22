@@ -204,7 +204,8 @@ def get_recursive_build_depends_in_workspace(package, ordered_packages):
             continue
         # Add the build, buildtool, and run depends of this dep to the list to be checked
         dep_pth, dep_pkg = workspace_packages_by_name[dep]
-        dep_depends = dep_pkg.build_depends + dep_pkg.buildtool_depends + dep_pkg.run_depends
+        dep_depends = dep_pkg.build_depends + dep_pkg.buildtool_depends + \
+                      dep_pkg.run_depends + dep_pkg.exec_depends
         depends.update(set([d.name for d in dep_depends]))
         # Add this package to the list of recursive dependencies for this package
         recursive_depends.append((dep_pth, dep_pkg))
@@ -228,7 +229,7 @@ def get_recursive_run_depends_in_workspace(packages, ordered_packages):
     workspace_packages_by_name = dict([(pkg.name, (pth, pkg)) for pth, pkg in ordered_packages])
     workspace_package_names = [pkg.name for pth, pkg in ordered_packages]
     recursive_depends = []
-    depends = set([dep.name for package in packages for dep in package.run_depends])
+    depends = set([dep.name for package in packages for dep in package.run_depends + package.exec_depends])
     checked_depends = set()
     while len(depends - checked_depends) > 0:
         # Get a dep
@@ -240,7 +241,7 @@ def get_recursive_run_depends_in_workspace(packages, ordered_packages):
             continue
         # Add the run depends of this dep to the list to be checked
         dep_pth, dep_pkg = workspace_packages_by_name[dep]
-        depends.update(set([d.name for d in dep_pkg.run_depends]))
+        depends.update(set([d.name for d in dep_pkg.run_depends + dep_pkg.exec_depends]))
         # Also update the checked_depends with its build depends
         checked_depends.update(set([d.name for d in (dep_pkg.buildtool_depends + dep_pkg.build_depends)]))
         # Add this package to the list of recursive dependencies for this package

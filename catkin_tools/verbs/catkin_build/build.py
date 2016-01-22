@@ -101,7 +101,7 @@ def determine_packages_to_be_built(packages, context, workspace_packages):
             # If metapackage, include run depends which are in the workspace
             package_obj = workspace_package_names[package][1]
             if 'metapackage' in [e.tagname for e in package_obj.exports]:
-                for rdep in package_obj.run_depends:
+                for rdep in package_obj.run_depends + package_obj.exec_depends:
                     if rdep.name in workspace_package_names:
                         packages.append(rdep.name)
         # Limit the packages to be built to just the provided packages
@@ -488,7 +488,7 @@ def _create_unmerged_devel_setup(context):
     workspace_packages = dict([(p.name, p) for pth, p in workspace_packages.items()])
     dependencies = set([])
     for name, pkg in workspace_packages.items():
-        dependencies.update([d.name for d in pkg.buildtool_depends + pkg.build_depends + pkg.run_depends])
+        dependencies.update([d.name for d in pkg.buildtool_depends + pkg.build_depends + pkg.run_depends + pkg.exec_depends])
     leaf_packages = []
     for name, pkg in workspace_packages.items():
         if pkg.name not in dependencies:
